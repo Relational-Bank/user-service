@@ -64,6 +64,9 @@ export class UserService {
                 action: logEvent.createUser,
                 message: "Failed to create user",
                 error: JSON.stringify(error),
+                context: {
+                    payload: JSON.stringify(input)
+                }
             });
 
             throw error;
@@ -109,6 +112,10 @@ export class UserService {
                 action: logEvent.createUser,
                 message: "Failed to create user",
                 error: JSON.stringify(error),
+                context: {
+                    userPayload: JSON.stringify(userPayload),
+                    userContactPayload: JSON.stringify(userContactPayload)
+                }
             });
 
             throw error;
@@ -127,6 +134,10 @@ export class UserService {
                         action: logEvent.validateUserInfo,
                         message: `Please enter the required '${nameField}' : ${nameValue}`,
                         error: ErrorCode.missingRequiredField,
+                        context: {
+                            nameField: nameField,
+                            nameValue: nameValue,
+                        }
                     };
 
                     this.logger.log(customError);
@@ -140,6 +151,10 @@ export class UserService {
                         action: logEvent.validateUserInfo,
                         message: `Please enter a valid ${nameField} : ${nameValue}`,
                         error: ErrorCode.invalidInput,
+                        context: {
+                            nameField: nameField,
+                            nameValue: nameValue,
+                        }
                     };
                     this.logger.log(customError);
                     throw new Error(customError.message);
@@ -155,6 +170,9 @@ export class UserService {
                     action: logEvent.validateUserInfo,
                     message: `Please enter a valid zip code : ${userInfoPayload.zipCode}`,
                     error: ErrorCode.invalidInput,
+                    context: {
+                        zipCode: userInfoPayload.zipCode,
+                    }
                 };
                 this.logger.log(customError);
                 throw new Error(customError.message);
@@ -169,6 +187,9 @@ export class UserService {
                     action: logEvent.validateUserInfo,
                     message: `Please enter a valid phone number : ${userInfoPayload.phoneNumber}`,
                     error: ErrorCode.invalidInput,
+                    context: {
+                        MobileNumber: userInfoPayload.phoneNumber,
+                    }
                 };
                 this.logger.log(customError);
                 throw new Error(customError.message);
@@ -178,6 +199,9 @@ export class UserService {
                 action: logEvent.validateUserInfo,
                 message: "Failed to validate user info",
                 error: JSON.stringify(error),
+                context: {
+                    payload: JSON.stringify(userInfoPayload)
+                }
             });
 
             throw error;

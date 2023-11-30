@@ -1,5 +1,6 @@
 import * as winston from "winston";
 import moment from "moment";
+import { LogContext } from "../interfaces/common.interface";
 
 export class Logger {
   private logFormat: winston.Logform.Format;
@@ -28,15 +29,18 @@ export class Logger {
     action,
     message,
     error,
+    context
   }: {
     action: string;
     message: string;
     error?: string;
+    context: LogContext;
   }) {
     const logObject = {
       action,
       message,
       error,
+      context
     };
 
     this.logger.info(JSON.stringify(logObject));

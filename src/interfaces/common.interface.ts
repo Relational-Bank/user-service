@@ -1,3 +1,3 @@
 export interface LogContext {
-  [key: string]: string | undefined | null;
+  [key: string]: string | number | undefined | null;
 }
