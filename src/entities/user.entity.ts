@@ -1,6 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from "typeorm";
 import { ContactEntity } from "./contact.entity";
 import { UserDemographicsEntity } from "./userDemographics.entity";
+import { UserCardEntity } from "./userCard.entity";
 
 @Entity("users")
 export class UserEntity {
@@ -24,4 +32,13 @@ export class UserEntity {
 
   @OneToMany(() => UserDemographicsEntity, demographics => demographics.user)
   demographics: UserDemographicsEntity;
+
+  @OneToMany(() => UserCardEntity, card => card.user)
+  cards: UserCardEntity[];
+
+  @CreateDateColumn({ name: "created_timestamp", nullable: false })
+  createdTimestamp?: Date;
+
+  @UpdateDateColumn({ name: "updated_timestamp", nullable: false })
+  updatedTimestamp?: Date;
 }

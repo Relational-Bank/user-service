@@ -4,6 +4,8 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from "typeorm";
 import { UserEntity } from "./user.entity";
 
@@ -45,4 +47,10 @@ export class ContactEntity {
   @ManyToOne(() => UserEntity, user => user.contacts)
   @JoinColumn({ name: "user_id", referencedColumnName: "userId" })
   user: UserEntity;
+
+  @CreateDateColumn({ name: "created_timestamp", nullable: false })
+  createdTimestamp?: Date;
+
+  @UpdateDateColumn({ name: "updated_timestamp", nullable: false })
+  updatedTimestamp?: Date;
 }

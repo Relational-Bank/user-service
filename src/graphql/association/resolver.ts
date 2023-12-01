@@ -1,6 +1,10 @@
 import { Logger } from "../../plugins/logging.plugin";
 import { UserService } from "../../services/user.service";
-import { UserDemographics, createUserInput } from "../../types/user.type";
+import {
+  UserDemographics,
+  createUserInput,
+  saveUserCard,
+} from "../../types/user.type";
 
 const logger = new Logger();
 
@@ -28,6 +32,19 @@ export const userResolver = {
       return new UserService(logger).saveUserDemographics({
         userId: args.userId,
         userDemographics: args.userDemographics,
+      });
+    },
+    savecardDetails(
+      parent: any,
+      args: {
+        userId: string;
+        input: saveUserCard;
+      },
+      context: any,
+    ) {
+      return new UserService(logger).saveCardDetails({
+        userId: args.userId,
+        input: args.input,
       });
     },
   },
