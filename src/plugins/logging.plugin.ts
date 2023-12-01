@@ -29,7 +29,7 @@ export class Logger {
     action,
     message,
     error,
-    context
+    context,
   }: {
     action: string;
     message: string;
@@ -40,7 +40,7 @@ export class Logger {
       action,
       message,
       error,
-      context
+      context,
     };
 
     this.logger.info(JSON.stringify(logObject));

@@ -10,20 +10,24 @@ export const userResolver = {
       return "hello world";
     },
     getUser(parent: any, args: { userId: string }, context: any) {
-      return new UserService(logger).getUser(args.userId)
-    }
+      return new UserService(logger).getUser(args.userId);
+    },
   },
   Mutation: {
     createUser(parent: any, args: { input: createUserInput }, context: any) {
       return new UserService(logger).createUser(args.input);
     },
-    saveUserDemographics(parent: any, args: {
-      userId: string,
-      userDemographics: UserDemographics
-    }, context: any) {
+    saveUserDemographics(
+      parent: any,
+      args: {
+        userId: string;
+        userDemographics: UserDemographics;
+      },
+      context: any,
+    ) {
       return new UserService(logger).saveUserDemographics({
         userId: args.userId,
-        userDemographics: args.userDemographics
+        userDemographics: args.userDemographics,
       });
     },
   },

@@ -123,4 +123,4 @@ type Mutation {
     createUser(input: CreateUserInput): User!
     saveUserDemographics(userId: String!, userDemographics: UserDemographicsInput): UserInfo!
 }
-`
+`;

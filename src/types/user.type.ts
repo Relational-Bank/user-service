@@ -1,4 +1,8 @@
-import { CommunicationMethod, MaritalStatus, PreferredLanguage } from "../enums/user.enum";
+import {
+  CommunicationMethod,
+  MaritalStatus,
+  PreferredLanguage,
+} from "../enums/user.enum";
 
 export type createUserInput = {
   firstName: string;
