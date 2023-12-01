@@ -1,14 +1,16 @@
 import { DBConnection } from "../resources/dataSource";
-import { forEach, pick } from "lodash";
+import { forEach, isEmpty, pick } from "lodash";
 import { v4 as uuidv4 } from "uuid";
 import { Logger } from "../plugins/logging.plugin";
 
 import { logEvent } from "../common/logEvent.enum";
 import { UserEntity } from "../entities/user.entity";
-import { User, createUserInput, validateUserInfo } from "../types/user.type";
+import { User, UserDemographics, UserInfo, createUserInput, validateUserInfo } from "../types/user.type";
 import { ValidationService } from "../common/validations";
 import { ErrorCode } from "../common/ErrorCode.enum";
 import { ContactEntity } from "../entities/contact.entity";
+import { SelectQueryBuilder } from "typeorm";
+import { UserDemographicsEntity } from "../entities/userDemographics.entity";
 
 export class UserService {
     private logger: Logger;
@@ -208,5 +210,108 @@ export class UserService {
         }
     };
 
-    public saveUserDemographics = () => { };
+    public getUser = async (userId: string): Promise<UserInfo> => {
+        try {
+            const userRepo = DBConnection.getRepository(UserEntity);
+
+            const queryBuilder: SelectQueryBuilder<UserEntity> = userRepo
+                .createQueryBuilder("user")
+                .leftJoinAndSelect("user.contacts", "contact")
+                .leftJoinAndSelect("user.demographics", "demographics")
+                .where("user.userId = :userId", { userId });
+
+            const userInfo = await queryBuilder.getOne();
+
+            if (!userInfo) {
+                const customError = {
+                    action: logEvent.getUserInfo,
+                    message: `User not found for the userId: ${userId}`,
+                    context: { userId }
+                };
+                this.logger.log(customError);
+
+                throw new Error(customError.message);
+            }
+
+            const contacts = Array.isArray(userInfo.contacts) ? userInfo.contacts : [];
+            const demographics = Array.isArray(userInfo.demographics) ? userInfo.demographics : [];
+
+            const contact = contacts[0] || {};
+            const demographic = demographics[0] || {};
+
+            const formattedUserInfo: UserInfo = {
+                userId: userInfo.userId,
+                firstName: userInfo.firstName,
+                middleName: userInfo.middleName,
+                lastName: userInfo.lastName,
+                contact: { ...contact },
+                demographics: { ...demographic },
+            };
+
+            return formattedUserInfo;
+        } catch (error) {
+            this.logger.log({
+                action: logEvent.getUserInfo,
+                message: "Failed to fetch user",
+                error: JSON.stringify(error),
+                context: { userId }
+            });
+
+            throw error;
+        }
+    };
+
+
+    public saveUserDemographics = async (
+        {
+            userId,
+            userDemographics
+        }: {
+            userId: string,
+            userDemographics: UserDemographics
+        }
+    ) => {
+        try {
+            const userRepo = DBConnection.getRepository(UserEntity);
+            const userDemographicsRepo = DBConnection.getRepository(UserDemographicsEntity);
+
+            const userRecord = await userRepo.findOne({ where: { userId } })
+
+            if (isEmpty(userRecord)) {
+                const customError = {
+                    action: logEvent.getUserInfo,
+                    message: `User not found for the userId: ${userId}`,
+                    context: { userId }
+                };
+                this.logger.log(customError);
+
+                throw new Error(customError.message);
+            }
+
+            const existingDemographics = await userDemographicsRepo.findOne({
+                where: { user: userRecord }
+            });
+
+            if (existingDemographics) {
+                await userDemographicsRepo.update(existingDemographics.id, userDemographics);
+            } else {
+                const newUserDemographics = userDemographicsRepo.create({
+                    ...userDemographics,
+                    user: userRecord
+                });
+
+                await userDemographicsRepo.save(newUserDemographics);
+            }
+
+        } catch (error) {
+            this.logger.log({
+                action: logEvent.saveUserDemographic,
+                message: "Save user demographics",
+                error: JSON.stringify(error),
+                context: { userId, demographics: JSON.stringify(userDemographics) }
+            });
+
+            throw error;
+        }
+    };
 }
