@@ -37,43 +37,42 @@ export class CommonService {
     return /^\d{16}$/.test(stringWithoutSpaces);
   };
 
-  public encrypt(text: string): string {
-    const algorithm = "aes-256-ctr";
-    const passphrase = "your-passphrase";
-    const salt = crypto.randomBytes(16);
-    const key = crypto.pbkdf2Sync(passphrase, salt, 100000, 32, "sha256");
+  private static readonly algorithm = "aes-256-ctr";
+  private static readonly encoding = "utf-8";
 
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv(algorithm, key, iv);
-    const encrypted = Buffer.concat([
-      cipher.update(text, "utf-8"),
-      cipher.final(),
-    ]);
-    return `${iv.toString("hex")}:${encrypted.toString("hex")}`;
+  private static readonly key = Buffer.from(
+    process.env.ENCRYPTION_HEX_KEY as string,
+    "hex",
+  );
+  private static readonly iv = Buffer.from(
+    process.env.ENCRYPTION_HEX_IV as string,
+    "hex",
+  );
+
+  public encrypt(text: string): string {
+    const cipher = crypto.createCipheriv(
+      CommonService.algorithm,
+      CommonService.key,
+      CommonService.iv,
+    );
+    let encrypted = cipher.update(text, CommonService.encoding, "hex");
+    encrypted += cipher.final("hex");
+    return encrypted;
   }
 
-  public decrypt(text: string): string {
-    const algorithm = "aes-256-ctr";
-    const passphrase = "Blue#Jupiter$42!Secret";
-    const salt = crypto.randomBytes(16);
-    const key = crypto.pbkdf2Sync(passphrase, salt, 100000, 32, "sha256");
-
-    const iv = crypto.randomBytes(16);
-    const [ivString, encryptedText] = text.split(":");
+  public decrypt(encryptedText: string): string {
     const decipher = crypto.createDecipheriv(
-      algorithm,
-      key,
-      Buffer.from(ivString, "hex"),
+      CommonService.algorithm,
+      CommonService.key,
+      CommonService.iv,
     );
-    const decrypted = Buffer.concat([
-      decipher.update(Buffer.from(encryptedText, "hex")),
-      decipher.final(),
-    ]);
-    console.log("decrypted", decrypted);
-
-    console.log("string", decrypted.toString("utf-8"));
-
-    return decrypted.toString("utf-8");
+    let decrypted = decipher.update(
+      encryptedText,
+      "hex",
+      CommonService.encoding,
+    );
+    decrypted += decipher.final(CommonService.encoding);
+    return decrypted;
   }
 
   public maskCreditCard = (encryptedString: string): string => {
