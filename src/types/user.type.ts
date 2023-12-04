@@ -97,9 +97,3 @@ export type userDemographics = {
   creditScore?: number;
   preferredCommunicationMethod?: CommunicationMethod;
 };
-
-export type saveUserCard = {
-  cardNumber: string;
-  expirationDate: string;
-  cvv: string;
-};

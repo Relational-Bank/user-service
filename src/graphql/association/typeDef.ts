@@ -114,18 +114,6 @@ input UserDemographicsInput {
     preferredCommunicationMethod: CommunicationMethod
 }
 
-input saveUserCardInput {
-    cardNumber: String
-    expirationDate: String
-    cvv: String
-}
-
-type saveUserCard {
-    cardNumber: String
-    expirationDate: String
-    cvv: String
-}
-
 type Query {
     greet: String
     getUser(userId: String!): UserInfo!
@@ -134,6 +122,5 @@ type Query {
 type Mutation {
     createUser(input: CreateUserInput): User!
     saveUserDemographics(userId: String!, userDemographics: UserDemographicsInput): UserInfo!
-    savecardDetails(userId: String!, input: saveUserCardInput!): saveUserCard!
 }
 `;

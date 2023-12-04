@@ -5,7 +5,8 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.ts"
+    "start": "nodemon index.ts",
+    "lint": "lint-staged"
   },
   "lint-staged": {
     "src/**/*.ts": [
@@ -15,18 +16,22 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "npm run lint && npm run precommit-check"
     }
   },
   "author": "M.A.Shelif",
   "license": "ISC",
   "dependencies": {
+    "@apollo/client": "^3.8.8",
     "@graphql-tools/schema": "^10.0.2",
     "@types/node": "^20.10.2",
+    "apollo-boost": "^0.4.9",
     "apollo-server-express": "^3.13.0",
+    "axios": "^1.6.2",
     "crypto": "^1.0.1",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
+    "gql-query-builder": "^3.8.0",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "nodemon": "^3.0.1",

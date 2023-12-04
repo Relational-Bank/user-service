@@ -17,7 +17,6 @@ export const DBConnection = new DataSource({
   database: process.env.DB_DATABASE,
   synchronize: true,
   logging: false,
-  // entities: ["./entities/*.entity.ts"],
   entities: [
     UserEntity,
     ContactEntity,

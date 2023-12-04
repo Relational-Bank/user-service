@@ -10,7 +10,6 @@ import {
   UserDemographics,
   UserInfo,
   createUserInput,
-  saveUserCard,
   validateUserInfo,
 } from "../types/user.type";
 import { CommonService } from "../common/common.service";
@@ -18,7 +17,7 @@ import { ErrorCode } from "../common/ErrorCode.enum";
 import { ContactEntity } from "../entities/contact.entity";
 import { SelectQueryBuilder } from "typeorm";
 import { UserDemographicsEntity } from "../entities/userDemographics.entity";
-import { UserCardEntity } from "../entities/userCard.entity";
+import { TransactionService } from "./transaction.service";
 
 export class UserService {
   private logger: Logger;
@@ -320,97 +319,6 @@ export class UserService {
         message: "Save user demographics",
         error: JSON.stringify(error),
         context: { userId, demographics: JSON.stringify(userDemographics) },
-      });
-
-      throw error;
-    }
-  };
-
-  public saveCardDetails = async ({
-    input,
-    userId,
-  }: {
-    input: saveUserCard;
-    userId: string;
-  }) => {
-    try {
-      const cardRepo = DBConnection.getRepository(UserCardEntity);
-      const userRepo = DBConnection.getRepository(UserEntity);
-      const cryptoService = new CommonService(this.logger);
-
-      const userRecord = await userRepo.findOne({ where: { userId } });
-
-      const isCardValid = cryptoService.isValidCardNumber(input.cardNumber);
-
-      if (isCardValid === false) {
-        const customError = {
-          action: logEvent.getUserInfo,
-          message: `Enter a valid card number ${input.cardNumber}`,
-          error: ErrorCode.invalidInput,
-          context: { userId },
-        };
-        this.logger.log(customError);
-
-        throw new Error(customError.message);
-      }
-
-      if (isEmpty(userRecord)) {
-        const customError = {
-          action: logEvent.getUserInfo,
-          message: `User not found for the userId: ${userId}`,
-          context: { userId },
-        };
-        this.logger.log(customError);
-
-        throw new Error(customError.message);
-      }
-
-      const existingCard = await cardRepo.findOne({
-        where: { user: userRecord },
-      });
-
-      if (existingCard) {
-        existingCard.cardNumber = cryptoService.encrypt(input.cardNumber);
-        existingCard.cvv = input.cvv;
-        existingCard.expirationDate = input.expirationDate;
-
-        await cardRepo.save(existingCard);
-
-        const buildCardData = {
-          cardNumber: cryptoService.maskCreditCard(existingCard.cardNumber),
-          cvv: existingCard.cvv,
-          expirationDate: existingCard.expirationDate,
-        };
-
-        return buildCardData;
-      } else {
-        const encryptedCardNumber = cryptoService.encrypt(input.cardNumber);
-
-        const cardPayload = cardRepo.create({
-          cardNumber: encryptedCardNumber,
-          cvv: input.cvv,
-          expirationDate: input.expirationDate,
-          user: userRecord,
-        });
-
-        const savedUsercard = await cardRepo.save(cardPayload);
-
-        const buildCardData = {
-          cardNumber: cryptoService.maskCreditCard(savedUsercard.cardNumber),
-          cvv: savedUsercard.cvv,
-          expirationDate: savedUsercard.expirationDate,
-        };
-
-        return buildCardData;
-      }
-    } catch (error) {
-      this.logger.log({
-        action: logEvent.saveCardDetails,
-        message: "Failed to save card details",
-        error: JSON.stringify(error),
-        context: {
-          payload: JSON.stringify(input),
-        },
       });
 
       throw error;
